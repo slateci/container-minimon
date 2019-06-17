@@ -1,0 +1,24 @@
+#!/bin/bash -x
+
+PATH=$PATH:/opt/puppetlabs/bin
+
+NODENAME=$(echo ${NODENAME:-none} | tr '.' '_')
+
+GRAPHITESERVER=${GRAPHITESERVER:-"graphite.mwt2.org"}
+GRAPHITEPORT=${GRAPHITEPORT:-"2003"}
+
+while true; do
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.total_mem $(facter memory.system.total_bytes) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.avail_mem $(facter memory.system.available_bytes) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.used_mem $(facter memory.system.used_bytes) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.percentage_mem $(facter memory.system.capacity | tr -d '%') $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.load_1m $(facter load_averages.1m) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.load_5m $(facter load_averages.5m) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.load_15m $(facter load_averages.15m) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.processor_count $(facter processors.count) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.process_speed $(facter processors.speed | awk '{print $1}') $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    echo "slate.k8s.${CLUSTER:-none}.${NODENAME}.uptime_days $(facter system_uptime.days) $(date +%s)" | nc -v -w 10 $GRAPHITESERVER $GRAPHITEPORT
+    sleep 60
+done
+
+
